@@ -7,13 +7,13 @@ import logging
 from dotenv import load_dotenv
 import json
 from ctc_chat_functions import (
-    ChatMemory, 
-    ChatMessage, 
-    ChatRole, 
+    ChatMemory,
+    ChatMessage,
+    ChatRole,
     ChatCompletion,
     ToolCall,
     chat_memory,
-    main  # Import the main function that initializes everything
+    main,  # Import the main function that initializes everything
 )
 
 # Set up logging
@@ -21,6 +21,7 @@ logging.basicConfig(level=logging.INFO)
 
 # Load environment variables
 load_dotenv()
+
 
 def update_suggested_actions(response: ChatMessage):
     """
@@ -31,37 +32,44 @@ def update_suggested_actions(response: ChatMessage):
     # For demonstration: If the response mentions "view", we show the "Create New Views" form.
     if response.content and "view" in response.content.lower():
         logging.info("View mentioned in response, adding view creation form")
-        st.session_state.suggested_actions = [{
-            "name": "Create New Views",
-            "type": "form",
-            "fields": [
-                {
-                    "name": "level",
-                    "type": "select",
-                    "options": [level["Name"] for level in chat_memory.get_levels() if "Name" in level]
-                },
-                {
-                    "name": "template",
-                    "type": "select",
-                    "options": [template["Name"] for template in chat_memory.get_view_templates() if "Name" in template]
-                },
-                {
-                    "name": "name",
-                    "type": "text",
-                    "description": "View name"
-                }
-            ]
-        }]
+        st.session_state.suggested_actions = [
+            {
+                "name": "Create New Views",
+                "type": "form",
+                "fields": [
+                    {
+                        "name": "level",
+                        "type": "select",
+                        "options": [
+                            level["name"]
+                            for level in chat_memory.get_levels()
+                            if "name" in level
+                        ],
+                    },
+                    {
+                        "name": "template",
+                        "type": "select",
+                        "options": [
+                            template["name"]
+                            for template in chat_memory.get_view_templates()
+                            if "name" in template
+                        ],
+                    },
+                    {"name": "name", "type": "text", "description": "View name"},
+                ],
+            }
+        ]
     else:
         logging.info("No view-related content found, clearing suggested actions")
         st.session_state.suggested_actions = []
+
 
 # Configure Streamlit page
 st.set_page_config(
     page_title="Revit Project Assistant",
     page_icon="🏗️",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
 # Initialize UI state
@@ -76,65 +84,73 @@ if "processing" not in st.session_state:
 if "openai_client" not in st.session_state or "tool_manager" not in st.session_state:
     logging.info(f"Initiate Backend...")
     backend = asyncio.run(main(initialize_only=True))
-    st.session_state.openai_client = backend['openai_client']
-    st.session_state.tool_manager = backend['tool_manager']
+    st.session_state.openai_client = backend["openai_client"]
+    st.session_state.tool_manager = backend["tool_manager"]
 
 # Sidebar with project context
 with st.sidebar:
     st.header("Project Context")
-    
+
     # Project Summary
     if project := chat_memory.get_active_project():
         st.subheader("Active Project")
-        if "Title" in project:
-            st.write(f"📋 **Name:** {project['Title']}")
+        if "title" in project:
+            st.write(f"📋 **Name:** {project['title']}")
         if "Number" in project:
             st.write(f"🔢 **Number:** {project['Number']}")
-    
+
     # Views organized by type
     if views := chat_memory.get_views():
         with st.expander("📐 Views"):
             # Separate views by type
             view_types = {}
             for view in views:
-                view_type = view.get('ViewType', 'Other')
+                view_type = view.get("viewTypeName", "Other")
                 if view_type not in view_types:
                     view_types[view_type] = []
-                view_types[view_type].append({
-                    'Name': view.get('Name', 'Unnamed'),
-                    'Id': view.get('Id', None)
-                })
-            
+                view_types[view_type].append(
+                    {"name": view.get("name", "Unnamed"), "id": view.get("id", None)}
+                )
+
             # Display views grouped by type
             for view_type, type_views in view_types.items():
                 st.write(f"**{view_type}**")
                 for view in type_views:
-                    st.write(f"- {view['Name']}")
-    
+                    st.write(f"- {view['name']}")
+
+    # Categories - simplified display
+    if categories := chat_memory.get_categories():
+        with st.expander("📊 Categories"):
+            for category in categories:
+                if "name" in category and "id" in category:
+                    st.write(f"- {category['name']}")
+
     # Levels - simplified display
     if levels := chat_memory.get_levels():
         with st.expander("📊 Levels"):
             for level in levels:
-                if 'Name' in level and 'Id' in level:
-                    st.write(f"- {level['Name']}")
-    
+                if "name" in level and "id" in level:
+                    st.write(f"- {level['name']}")
+
     # View Templates - simplified display
     if templates := chat_memory.get_view_templates():
         with st.expander("🎨 View Templates"):
             for template in templates:
-                if 'Name' in template:
-                    st.write(f"- {template['Name']}")
-    
+                if "name" in template:
+                    st.write(f"- {template['name']}")
+
     # Hidden technical info container
-    if st.session_state.get('show_technical_info', False):
+    if st.session_state.get("show_technical_info", False):
         with st.expander("🔧 Technical Information", expanded=False):
             st.write("View Creation Requirements:")
-            st.json({
-                "Name": "string",
-                "LevelId": "integer_elementId",
-                "ViewTemplateId": "integer_elementId",
-                "ScopeBoxId": "null (not implemented)"
-            })
+            st.json(
+                {
+                    "name": "string",
+                    "levelId": "integer_elementId",
+                    "viewTemplateId": "integer_elementId",
+                    "scopeBoxId": "null (not implemented)",
+                }
+            )
 
 # Main chat interface
 st.title("BIM Automation Assistant")
@@ -145,7 +161,9 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # Chat input and processing
-if prompt := st.chat_input("How can I help you with your Revit project?", disabled=st.session_state.processing):
+if prompt := st.chat_input(
+    "How can I help you with your Revit project?", disabled=st.session_state.processing
+):
     logging.info(f"Received new prompt: {prompt}")
     # Add user message immediately
     st.session_state.messages.append({"role": "user", "content": prompt})
@@ -162,7 +180,7 @@ if st.session_state.processing and st.session_state.messages:
                 # Get the last user message
                 last_message = st.session_state.messages[-1]["content"]
                 logging.info(f"Processing user message: {last_message}")
-                
+
                 system_message = """You are a BIM Automation Assistant that helps users with Revit tasks.
 You can understand natural language requests and convert them into appropriate actions.
 When users mention names of levels, templates, or views, you can look up their IDs automatically.
@@ -175,34 +193,39 @@ When asked to create a floor plan:
 
 Focus on understanding user intent and executing requested actions efficiently."""
                 logging.info(f"System message: {system_message}")
-                
+
                 # Create initial chat completion request
                 request = ChatCompletion(
                     messages=[
-                        ChatMessage(
-                            role=ChatRole.SYSTEM,
-                            content=system_message
-                        ),
-                        ChatMessage(role=ChatRole.USER, content=last_message)
+                        ChatMessage(role=ChatRole.SYSTEM, content=system_message),
+                        ChatMessage(role=ChatRole.USER, content=last_message),
                     ]
                 )
-                
+
                 # Get initial response
                 logging.info("Sending request to OpenAI")
-                initial_response = asyncio.run(st.session_state.openai_client.create_chat_completion(request))
+                initial_response = asyncio.run(
+                    st.session_state.openai_client.create_chat_completion(request)
+                )
                 logging.info(f"Received initial response: {initial_response}")
-                
+
                 if initial_response.function_call:
-                    logging.info(f"Function call detected: {initial_response.function_call.name}")
+                    logging.info(
+                        f"Function call detected: {initial_response.function_call.name}"
+                    )
                     # Execute the tool
                     tool_call = ToolCall(
                         name=initial_response.function_call.name,
-                        parameters=json.loads(initial_response.function_call.arguments)
+                        parameters=json.loads(initial_response.function_call.arguments),
                     )
-                    logging.info(f"Executing tool: {tool_call.name} with parameters: {tool_call.parameters}")
-                    tool_response = asyncio.run(st.session_state.tool_manager.execute_tool(tool_call))
+                    logging.info(
+                        f"Executing tool: {tool_call.name} with parameters: {tool_call.parameters}"
+                    )
+                    tool_response = asyncio.run(
+                        st.session_state.tool_manager.execute_tool(tool_call)
+                    )
                     logging.info(f"Tool response: {tool_response}")
-                    
+
                     # Add tool response to messages and get LLM interpretation
                     follow_up_request = ChatCompletion(
                         messages=[
@@ -210,50 +233,54 @@ Focus on understanding user intent and executing requested actions efficiently."
                             ChatMessage(
                                 role=ChatRole.ASSISTANT,
                                 content=None,
-                                function_call=initial_response.function_call
+                                function_call=initial_response.function_call,
                             ),
                             ChatMessage(
                                 role=ChatRole.FUNCTION,
                                 name=tool_call.name,
-                                content=tool_response.json()
-                            )
+                                content=tool_response.json(),
+                            ),
                         ],
                         model=request.model,
-                        temperature=request.temperature
+                        temperature=request.temperature,
                     )
-                    
+
                     # Get LLM's interpretation of the tool response
                     logging.info("Getting final response from OpenAI")
-                    final_response = asyncio.run(st.session_state.openai_client.create_chat_completion(follow_up_request))
+                    final_response = asyncio.run(
+                        st.session_state.openai_client.create_chat_completion(
+                            follow_up_request
+                        )
+                    )
                     logging.info(f"Final response: {final_response}")
-                    
+
                     # Add final response to chat
-                    st.session_state.messages.append({
-                        "role": "assistant",
-                        "content": final_response.content
-                    })
-                    
+                    st.session_state.messages.append(
+                        {"role": "assistant", "content": final_response.content}
+                    )
+
                     # Update suggested actions based on context
                     update_suggested_actions(final_response)
-                    
+
                 else:
                     logging.info("No function call needed, using initial response")
                     # If no function call, just add the initial response to chat
-                    st.session_state.messages.append({
-                        "role": "assistant",
-                        "content": initial_response.content
-                    })
-                    
+                    st.session_state.messages.append(
+                        {"role": "assistant", "content": initial_response.content}
+                    )
+
                     # Update suggested actions based on context
                     update_suggested_actions(initial_response)
-                
+
             except Exception as e:
                 logging.error(f"Error processing request: {str(e)}", exc_info=True)
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": f"An error occurred while processing your request: {str(e)}"
-                })
-            
+                st.session_state.messages.append(
+                    {
+                        "role": "assistant",
+                        "content": f"An error occurred while processing your request: {str(e)}",
+                    }
+                )
+
             finally:
                 logging.info("Processing complete, resetting processing state")
                 st.session_state.processing = False
@@ -263,7 +290,7 @@ Focus on understanding user intent and executing requested actions efficiently."
 if st.session_state.suggested_actions:
     st.divider()
     st.subheader("Suggested Actions")
-    
+
     for action in st.session_state.suggested_actions:
         if action["type"] == "form":
             with st.expander(action["name"]):
@@ -272,48 +299,71 @@ if st.session_state.suggested_actions:
                     for field in action["fields"]:
                         if field["type"] == "select":
                             values[field["name"]] = st.selectbox(
-                                field["name"].title(),
-                                options=field["options"]
+                                field["name"].title(), options=field["options"]
                             )
                         elif field["type"] == "text":
                             values[field["name"]] = st.text_input(
-                                field["name"].title(),
-                                help=field.get("description", "")
+                                field["name"].title(), help=field.get("description", "")
                             )
                         elif field["type"] == "number":
                             values[field["name"]] = st.number_input(
-                                field["name"].title(),
-                                min_value=field.get("min", 0)
+                                field["name"].title(), min_value=field.get("min", 0)
                             )
-                    
+
                     if st.form_submit_button("Execute"):
                         with st.spinner("Executing action..."):
                             # Get the level and template IDs based on their names
-                            level_id = next((level["Id"] for level in chat_memory.get_levels() 
-                                           if level["Name"] == values["level"]), None)
-                            template_id = next((template["Id"] for template in chat_memory.get_view_templates() 
-                                              if template["Name"] == values["template"]), None)
-                            
+                            category_id = next(
+                                (
+                                    category["id"]
+                                    for category in chat_memory.get_categories()
+                                    if category["name"] == values["category"]
+                                ),
+                                None,
+                            )
+                            level_id = next(
+                                (
+                                    level["id"]
+                                    for level in chat_memory.get_levels()
+                                    if level["name"] == values["level"]
+                                ),
+                                None,
+                            )
+                            template_id = next(
+                                (
+                                    template["id"]
+                                    for template in chat_memory.get_view_templates()
+                                    if template["name"] == values["template"]
+                                ),
+                                None,
+                            )
+
                             if level_id and template_id:
                                 # Create the floor plan
-                                result = asyncio.run(st.session_state.tool_manager.execute_tool(
-                                    ToolCall(
-                                        name="create_floor_plan",
-                                        parameters={
-                                            "Name": values["name"],
-                                            "LevelId": level_id,
-                                            "ViewTemplateId": template_id,
-                                            "ScopeBoxId": 0
-                                        }
+                                result = asyncio.run(
+                                    st.session_state.tool_manager.execute_tool(
+                                        ToolCall(
+                                            name="create_floor_plan",
+                                            parameters={
+                                                "Name": values["name"],
+                                                "LevelId": level_id,
+                                                "ViewTemplateId": template_id,
+                                                "ScopeBoxId": 0,
+                                            },
+                                        )
                                     )
-                                ))
-                                
+                                )
+
                                 if result.success:
-                                    st.success(f"Successfully created view: {values['name']}")
+                                    st.success(
+                                        f"Successfully created view: {values['name']}"
+                                    )
                                     # Force refresh of views in sidebar
-                                    asyncio.run(st.session_state.tool_manager.execute_tool(
-                                        ToolCall(name="getViews", parameters={})
-                                    ))
+                                    asyncio.run(
+                                        st.session_state.tool_manager.execute_tool(
+                                            ToolCall(name="getViews", parameters={})
+                                        )
+                                    )
                                     st.rerun()
                                 else:
                                     st.error(f"Failed to create view: {result.error}")
