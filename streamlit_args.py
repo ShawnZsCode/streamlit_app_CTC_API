@@ -1,20 +1,24 @@
-# streamlit_app.py
-import streamlit as st
-from typing import List, Dict, Any
+"""Streamlit app for the Revit Project Assistant."""
+
 import asyncio
-import os
 import logging
-from dotenv import load_dotenv
 import json
-from ctc_chat_functions import (
-    ChatMemory,
+import streamlit as st
+
+# from typing import List, Dict, Any
+from dotenv import load_dotenv
+
+from core.ctc_tool_models import (
+    ToolCall,
+    chat_memory,
+)
+from core.openai_functions import (
     ChatMessage,
     ChatRole,
     ChatCompletion,
-    ToolCall,
-    chat_memory,
-    main,  # Import the main function that initializes everything
 )
+from core.main_entry import main
+
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -82,7 +86,7 @@ if "processing" not in st.session_state:
 
 # Initialize backend components
 if "openai_client" not in st.session_state or "tool_manager" not in st.session_state:
-    logging.info(f"Initiate Backend...")
+    logging.info("Initiate Backend...")
     backend = asyncio.run(main(initialize_only=True))
     st.session_state.openai_client = backend["openai_client"]
     st.session_state.tool_manager = backend["tool_manager"]
@@ -124,6 +128,13 @@ with st.sidebar:
             for category in categories:
                 if "name" in category and "id" in category:
                     st.write(f"- {category['name']}")
+
+    # Elements - simplified display
+    if elements := chat_memory.get_elements():
+        with st.expander("🧱 Elements"):
+            for element in elements:
+                if "name" in element and "id" in element:
+                    st.write(f"- {element['name']}")
 
     # Levels - simplified display
     if levels := chat_memory.get_levels():
