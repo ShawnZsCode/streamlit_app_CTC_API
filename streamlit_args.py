@@ -8,7 +8,7 @@ import streamlit as st
 # from typing import List, Dict, Any
 from dotenv import load_dotenv
 
-from core.ctc_tool_models import (
+from core.tool_models import (
     ToolCall,
     chat_memory,
 )
@@ -94,6 +94,28 @@ if "openai_client" not in st.session_state or "tool_manager" not in st.session_s
 # Sidebar with project context
 with st.sidebar:
     st.header("Project Context")
+    # Session Summary
+    if sessions := chat_memory.get_sessions():
+        st.subheader("Active Revit Sessions")
+        with st.expander("Sessions", expanded=True):
+            # Separate sessions by Revit version
+            versions = {}
+            for session in sessions:
+                revit_version = session.get("RevitVersion", "Unknown Version")
+                if revit_version not in versions:
+                    versions[revit_version] = []
+                versions[revit_version].append(
+                    {
+                        "port": session.get("Port", "Unnamed"),
+                        "model": session.get("ActiveProject", None),
+                    }
+                )
+
+            # Display sessions grouped by version
+            for version, version_sessions in versions.items():
+                st.write(f"**{version}**")
+                for session in version_sessions:
+                    st.write(f"- Port: {session['port']}, Model: {session['model']}")
 
     # Project Summary
     if project := chat_memory.get_active_project():

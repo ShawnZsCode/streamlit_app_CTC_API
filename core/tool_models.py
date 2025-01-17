@@ -52,6 +52,7 @@ class ChatMemory:
         self.conversations: Dict[str, List[Dict[str, Any]]] = {}
         self.context_data: Dict[str, Any] = {
             "name_to_id_mappings": {
+                "sessions": {},  # session_name -> session_id
                 "levels": {},  # level_name -> level_id
                 "templates": {},  # template_name -> template_id
                 "views": {},  # view_name -> view_id
@@ -59,6 +60,19 @@ class ChatMemory:
                 "elements": {},  # element_name -> element_id
             }
         }
+
+    def store_sessions(self, sessions: List[Dict[str, Any]]):
+        """Store only name to ID mappings for sessions"""
+        # Store the full session data for reference
+        self.context_data["sessions"] = sessions
+
+        # Store the version to Port mappings
+        self.context_data["name_to_id_mappings"]["sessions"] = {
+            session["version"]: session["port"]
+            for session in sessions
+            if "name" in session and "port" in session
+        }
+        self.context_data["sessions_last_updated"] = datetime.now()
 
     def store_views(self, views: List[Dict[str, Any]]):
         """Store only name to ID mappings for views"""
@@ -124,6 +138,10 @@ class ChatMemory:
     def get_id_by_name(self, item_type: str, name: str) -> Optional[int]:
         """Get ID by name for any stored mapping type"""
         return self.context_data["name_to_id_mappings"].get(item_type, {}).get(name)
+
+    def get_sessions(self) -> List[Dict[str, Any]]:
+        """Get the stored active revit sessions"""
+        return self.context_data.get("sessions", {})
 
     def get_active_project(self) -> Dict[str, Any]:
         """Get the stored active project data"""

@@ -5,7 +5,7 @@ from typing import Dict, Any
 from dotenv import load_dotenv
 import aiohttp
 
-from core.ctc_tool_models import chat_memory
+from core.tool_models import chat_memory
 
 # Load environment variables from .env file in this directory
 load_dotenv()
@@ -41,5 +41,15 @@ async def get_elements(CategoryId: int) -> Dict[str, Any]:
         except Exception as e:
             return {"success": False, "error": f"Error fetching elements: {str(e)}"}
 
-    # async def create_element()
-    """API call to create a new element in the project"""
+
+async def update_element(
+    element_id: int, parameter_id: int, value: Any
+) -> Dict[str, Any]:
+    """API call to update a new element in the project"""
+    api_key = os.getenv("CTC_API_KEY")
+    if not api_key:
+        raise ValueError("CTC_API_KEY not found in environment variables")
+
+    async with aiohttp.ClientSession() as session:
+        url = f"http://localhost:{revit_port}/api/v1/elements/{element_id}"
+        params = {"apiKey": api_key}

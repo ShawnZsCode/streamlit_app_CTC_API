@@ -6,7 +6,7 @@ from typing import Dict, Any
 from dotenv import load_dotenv
 import aiohttp
 
-from core.ctc_tool_models import chat_memory
+from core.tool_models import chat_memory
 
 # Load environment variables from .env file in this directory
 load_dotenv()
@@ -14,18 +14,18 @@ revit_port = os.getenv("REVIT_PORT")
 
 
 # Revit Tool Implementations
-async def get_active_project() -> Dict[str, Any]:
+async def get_active_project(port: int = revit_port) -> Dict[str, Any]:
     """Get active project open in Revit right now"""
     api_key = os.getenv("CTC_API_KEY")
     if not api_key:
         raise ValueError("CTC_API_KEY not found in environment variables")
 
     async with aiohttp.ClientSession() as session:
-        url = f"http://localhost:{revit_port}/api/v1/projects/active"
+        url = f"http://localhost:{port}/api/v1/projects/active"
         params = {"apiKey": api_key}
 
         try:
-            async with session.get(url, params=params) as response:
+            async with session.get(url=url, params=params) as response:
                 if response.status == 200:
                     project_data = await response.json()
 

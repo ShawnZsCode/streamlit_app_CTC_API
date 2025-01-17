@@ -6,7 +6,7 @@ from typing import List, Dict, Any
 from dotenv import load_dotenv
 import aiohttp
 
-from core.ctc_tool_models import chat_memory
+from core.tool_models import chat_memory
 
 # Load environment variables from .env file in this directory
 load_dotenv()
@@ -102,10 +102,7 @@ async def get_view_templates() -> List[Dict[str, Any]]:
 
 
 async def create_floor_plan(
-    Name: str,
-    LevelId: int,
-    ViewTemplateId: int,
-    ScopeBoxId: int = 0,
+    Name: str, LevelId: int, ViewTemplateId: int, ScopeBoxId: int = 0
 ) -> Dict[str, Any]:
     """Create new floor plan in the project"""
     api_key = os.getenv("CTC_API_KEY")

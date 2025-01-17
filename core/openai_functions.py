@@ -5,7 +5,7 @@ from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 import openai
 
-from core.ctc_tool_models import (
+from core.tool_models import (
     ToolManager,
     FunctionCall,
 )

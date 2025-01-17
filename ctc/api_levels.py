@@ -5,7 +5,7 @@ from typing import Dict, Any
 from dotenv import load_dotenv
 import aiohttp
 
-from core.ctc_tool_models import chat_memory
+from core.tool_models import chat_memory
 
 # Load environment variables from .env file in this directory
 load_dotenv()

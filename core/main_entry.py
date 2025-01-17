@@ -1,23 +1,26 @@
 import os
 import json
 
-from core.ctc_tool_models import (
+from core.tool_models import (
     ToolCall,
     ToolManager,
 )
-from core.ctc_api_categories import (
+from ctc.sessions import (
+    get_sessions,
+)
+from ctc.api_categories import (
     get_categories,
 )
-from core.ctc_api_elements import (
+from ctc.api_elements import (
     get_elements,
 )
-from core.ctc_api_projects import (
+from ctc.api_projects import (
     get_active_project,
 )
-from core.ctc_api_levels import (
+from ctc.api_levels import (
     get_levels,
 )
-from core.ctc_api_views import (
+from ctc.api_views import (
     get_views,
     get_view_templates,
     create_floor_plan,
@@ -36,6 +39,20 @@ async def main(initialize_only=False):
 
     # Define your tools configuration
     tools_config = [
+        {
+            "type": "function",
+            "function": {
+                "name": "get_sessions",
+                "description": "Get available Revit sessions",
+                "parameters": {
+                    "type": "object",
+                    "required": [],
+                    "properties": {},
+                    "additionalProperties": False,
+                },
+                "strict": True,
+            },
+        },
         {
             "type": "function",
             "function": {
@@ -160,6 +177,7 @@ async def main(initialize_only=False):
 
     # Create implementations mapping
     implementations = {
+        "get_sessions": get_sessions,
         "get_active_project": get_active_project,
         "get_views": get_views,
         "get_categories": get_categories,
@@ -239,7 +257,7 @@ async def main(initialize_only=False):
             print(f"Assistant response: {response.content}")
 
 
-if __name__ == "__main__":
-    import asyncio
+# if __name__ == "__main__":
+#     import asyncio
 
-    asyncio.run(main())
+#     asyncio.run(main())
