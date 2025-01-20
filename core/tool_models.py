@@ -3,6 +3,7 @@
 from datetime import datetime
 from typing import List, Dict, Any, Optional, Callable
 from pydantic import BaseModel
+import logging
 
 
 # Pydantic Models for Tool Definitions
@@ -52,6 +53,7 @@ class ChatMemory:
         self.conversations: Dict[str, List[Dict[str, Any]]] = {}
         self.context_data: Dict[str, Any] = {
             "name_to_id_mappings": {
+                "active_session": {},  # port number of the active session
                 "sessions": {},  # session_name -> session_id
                 "levels": {},  # level_name -> level_id
                 "templates": {},  # template_name -> template_id
@@ -73,6 +75,14 @@ class ChatMemory:
             if "name" in session and "port" in session
         }
         self.context_data["sessions_last_updated"] = datetime.now()
+
+    def store_session(self, session: Dict[str, Any]):
+        """Store the active session by port number"""
+        self.context_data["active_session"] = session["Port"]
+
+        # Store the version to Port mapping
+        self.context_data["name_to_id_mappings"]["active_session"] = session
+        self.context_data["active_session_last_updated"] = datetime.now()
 
     def store_views(self, views: List[Dict[str, Any]]):
         """Store only name to ID mappings for views"""
@@ -143,6 +153,10 @@ class ChatMemory:
         """Get the stored active revit sessions"""
         return self.context_data.get("sessions", {})
 
+    def get_active_session(self) -> int:
+        """Get the stored active project data"""
+        return self.context_data.get("active_session", {})
+
     def get_active_project(self) -> Dict[str, Any]:
         """Get the stored active project data"""
         return self.context_data.get("active_project", {})
@@ -185,6 +199,7 @@ class ToolManager:
         """Get all tool schemas in OpenAI function format"""
         schemas = []
         for tool in self.tools.values():
+            # logging.info(f"Generating schema for tool: {tool.name}: {tool.description}")
             schema = {
                 "name": tool.name,
                 "description": tool.description,
@@ -214,6 +229,7 @@ class ToolManager:
         required = function_def.get("parameters", {}).get("required", [])
 
         for param_name, param_info in properties.items():
+            # logging.info(f"Registering parameter: {param_name}")
             params.append(
                 ToolParameter(
                     name=param_name,
@@ -237,6 +253,7 @@ class ToolManager:
         """Register multiple tools from a list of OpenAI function schemas"""
         for tool_schema in tools_config:
             function_name = tool_schema.get("function", tool_schema).get("name")
+            # logging.info(f"Registering tool: {function_name}")
             if function_name in implementations:
                 self.register_from_openai_schema(
                     tool_schema, implementations[function_name]
@@ -252,6 +269,9 @@ class ToolManager:
             )
 
         try:
+            logging.info(
+                f"Executing tool: {tool_call.name} with parameters: {tool_call.parameters}"
+            )
             result = await self.implementations[tool_call.name](**tool_call.parameters)
             return ToolResponse(success=True, result=result)
         except Exception as e:

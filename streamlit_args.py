@@ -63,8 +63,33 @@ def update_suggested_actions(response: ChatMessage):
                 ],
             }
         ]
+    elif response.content and "session" in response.content.lower():
+        logging.info("Session mentioned in response, setting active session form")
+        st.session_state.suggested_actions = [
+            {
+                "name": "Set Current Session",
+                "type": "form",
+                "fields": [
+                    {
+                        "name": "Revit Port",
+                        "type": "select",
+                        "options": [
+                            session["Port"] for session in chat_memory.get_sessions()
+                        ],
+                    },
+                    {
+                        "name": "Revit Project",
+                        "type": "select",
+                        "options": [
+                            session["ActiveModel"]
+                            for session in chat_memory.get_sessions()
+                        ],
+                    },
+                ],
+            }
+        ]
     else:
-        logging.info("No view-related content found, clearing suggested actions")
+        logging.info("No suggested actions found, clearing suggested actions")
         st.session_state.suggested_actions = []
 
 
@@ -94,6 +119,14 @@ if "openai_client" not in st.session_state or "tool_manager" not in st.session_s
 # Sidebar with project context
 with st.sidebar:
     st.header("Project Context")
+    # Active Sessions
+    if session := chat_memory.get_active_session():
+        st.subheader("Active Session")
+        with st.expander("Session", expanded=True):
+            st.write(f"**Version:** {session['RevitVersion']}")
+            st.write(f"**Port:** {session['Port']}")
+            st.write(f"**Active Model:** {session['ActiveProject']}")
+
     # Session Summary
     if sessions := chat_memory.get_sessions():
         st.subheader("Active Revit Sessions")
@@ -271,7 +304,7 @@ Focus on understanding user intent and executing requested actions efficiently."
                             ChatMessage(
                                 role=ChatRole.FUNCTION,
                                 name=tool_call.name,
-                                content=tool_response.json(),
+                                content=tool_response.model_dump_json(),
                             ),
                         ],
                         model=request.model,
@@ -325,7 +358,7 @@ if st.session_state.suggested_actions:
     st.subheader("Suggested Actions")
 
     for action in st.session_state.suggested_actions:
-        if action["type"] == "form":
+        if action["name"] == "Create New Views":
             with st.expander(action["name"]):
                 with st.form(f"form_{action['name']}"):
                     values = {}
@@ -402,3 +435,38 @@ if st.session_state.suggested_actions:
                                     st.error(f"Failed to create view: {result.error}")
                             else:
                                 st.error("Could not find level or template IDs")
+        elif action["name"] == "Set Current Session":
+            with st.expander(action["name"]):
+                with st.form(f"form_{action['name']}"):
+                    values = {}
+                    for field in action["fields"]:
+                        if field["type"] == "select":
+                            values[field["name"]] = st.selectbox(
+                                field["name"].title(), options=field["options"]
+                            )
+
+                    if st.form_submit_button("Execute"):
+                        with st.spinner("Setting active session..."):
+                            # Set the active session in the .env file
+                            result = asyncio.run(
+                                st.session_state.set_active_session(
+                                    Port=values["revit_port"],
+                                    ActiveProject=values["revit_project"],
+                                )
+                            )
+
+                            if result:
+                                st.success(
+                                    f"Successfully set active session to port: {values['revit_port']}"
+                                )
+                                # Force refresh of sessions in sidebar
+                                asyncio.run(
+                                    st.session_state.tool_manager.execute_tool(
+                                        ToolCall(
+                                            name="get_active_session", parameters={}
+                                        )
+                                    )
+                                )
+                                st.rerun()
+                            else:
+                                st.error("Failed to set active session")

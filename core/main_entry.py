@@ -7,6 +7,8 @@ from core.tool_models import (
 )
 from ctc.sessions import (
     get_sessions,
+    get_active_session,
+    set_active_session,
 )
 from ctc.api_categories import (
     get_categories,
@@ -48,6 +50,43 @@ async def main(initialize_only=False):
                     "type": "object",
                     "required": [],
                     "properties": {},
+                    "additionalProperties": False,
+                },
+                "strict": True,
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "get_active_session",
+                "description": "Gets current Revit session",
+                "parameters": {
+                    "type": "object",
+                    "required": [],
+                    "properties": {},
+                    "additionalProperties": False,
+                },
+                "strict": True,
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "set_active_session",
+                "description": "set the port to target an available Revit session",
+                "parameters": {
+                    "type": "object",
+                    "required": [],
+                    "properties": {
+                        "Port": {
+                            "type": "integer",
+                            "description": "The port number of the Revit session to connect to. If not specified, 0 will be used.",
+                        },
+                        "ActiveProject": {
+                            "type": "string",
+                            "description": "The name of the Revit project to connect to. If not specified, '' will be used.",
+                        },
+                    },
                     "additionalProperties": False,
                 },
                 "strict": True,
@@ -178,6 +217,8 @@ async def main(initialize_only=False):
     # Create implementations mapping
     implementations = {
         "get_sessions": get_sessions,
+        "set_active_session": set_active_session,
+        "get_active_session": get_active_session,
         "get_active_project": get_active_project,
         "get_views": get_views,
         "get_categories": get_categories,

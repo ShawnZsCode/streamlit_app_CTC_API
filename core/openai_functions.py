@@ -1,5 +1,7 @@
 """OpenAI Chat Engine Functions"""
 
+import os
+import logging
 from enum import Enum
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
@@ -65,6 +67,7 @@ class OpenAIClient:
 
         message = response.choices[0].message
 
+        logging.info(f"Revit Port: {os.environ.get('REVIT_PORT')}")
         function_call = None
         if message.function_call:
             function_call = FunctionCall(
