@@ -63,8 +63,10 @@ async def get_active_model(revit_session: RevitSession) -> RevitSession:
         port: int = revit_session.Port
         response = await get_active_project(port)
         if "title" in response["result"].keys():
+            # temporary handling response in 2025
             active = response["result"]["title"]
         else:
+            # temporary handling response in 2021
             active = response["result"]["Title"]
         revit_session.update(ActiveProject=active)
     except Exception as e:
