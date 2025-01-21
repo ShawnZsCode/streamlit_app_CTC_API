@@ -8,13 +8,13 @@ import aiohttp
 from core.tool_models import chat_memory
 
 # Load environment variables from .env file in this directory
-load_dotenv()
-revit_port = os.getenv("REVIT_PORT")
 
 
 # Revit Tool Implementations
 async def get_levels() -> Dict[str, Any]:
     """API call to get the levels in the project"""
+    load_dotenv()
+    revit_port = os.getenv("REVIT_PORT")
     api_key = os.getenv("CTC_API_KEY")
     if not api_key:
         raise ValueError("CTC_API_KEY not found in environment variables")

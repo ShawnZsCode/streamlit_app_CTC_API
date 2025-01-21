@@ -71,18 +71,21 @@ def update_suggested_actions(response: ChatMessage):
                 "type": "form",
                 "fields": [
                     {
-                        "name": "Revit Port",
+                        "name": "port",
                         "type": "select",
                         "options": [
-                            session["Port"] for session in chat_memory.get_sessions()
+                            session["port"]
+                            for session in chat_memory.get_sessions()
+                            if "Port" in session
                         ],
                     },
                     {
-                        "name": "Revit Project",
+                        "name": "revit project",
                         "type": "select",
                         "options": [
-                            session["ActiveModel"]
+                            session["ActiveProject"]
                             for session in chat_memory.get_sessions()
+                            if "ActiveProject" in session
                         ],
                     },
                 ],
@@ -135,7 +138,7 @@ with st.sidebar:
             versions = {}
             for session in sessions:
                 revit_version = session.get("RevitVersion", "Unknown Version")
-                if revit_version not in versions:
+                if revit_version not in versions.keys():
                     versions[revit_version] = []
                 versions[revit_version].append(
                     {
@@ -143,6 +146,7 @@ with st.sidebar:
                         "model": session.get("ActiveProject", None),
                     }
                 )
+                logging.info(f"Versions: {versions}")
 
             # Display sessions grouped by version
             for version, version_sessions in versions.items():
@@ -379,14 +383,6 @@ if st.session_state.suggested_actions:
                     if st.form_submit_button("Execute"):
                         with st.spinner("Executing action..."):
                             # Get the level and template IDs based on their names
-                            category_id = next(
-                                (
-                                    category["id"]
-                                    for category in chat_memory.get_categories()
-                                    if category["name"] == values["category"]
-                                ),
-                                None,
-                            )
                             level_id = next(
                                 (
                                     level["id"]
@@ -450,14 +446,14 @@ if st.session_state.suggested_actions:
                             # Set the active session in the .env file
                             result = asyncio.run(
                                 st.session_state.set_active_session(
-                                    Port=values["revit_port"],
-                                    ActiveProject=values["revit_project"],
+                                    Port=values["port"],
+                                    ActiveProject=values["revit project"],
                                 )
                             )
 
                             if result:
                                 st.success(
-                                    f"Successfully set active session to port: {values['revit_port']}"
+                                    f"Successfully set active session to port: {values['port']}"
                                 )
                                 # Force refresh of sessions in sidebar
                                 asyncio.run(
