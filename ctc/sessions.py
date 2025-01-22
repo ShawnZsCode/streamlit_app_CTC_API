@@ -39,7 +39,7 @@ class RevitSessions(LocalBaseModel):
 async def get_sessions() -> List[Dict[str, any]]:
     """Reads the active sessions from the CTC sessions folder"""
     try:
-        file_path: str = "C:\\Users\\shawnz\\AppData\\Local\\CTC Software\\BIM Automation\\BIM Automation API Instances.json"
+        file_path: str = f"{environ['LOCALAPPDATA']}\\CTC Software\\BIM Automation\\BIM Automation API Instances.json"
         file_json = read_file(file_path)
         rvt_sessions = RevitSessions()
         # RevitSessions.model_validate(file_json)

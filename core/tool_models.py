@@ -53,8 +53,9 @@ class ChatMemory:
         self.conversations: Dict[str, List[Dict[str, Any]]] = {}
         self.context_data: Dict[str, Any] = {
             "name_to_id_mappings": {
-                "active_session": {},  # port number of the active session
                 "sessions": {},  # session_name -> session_id
+                "active_session": {},  # port number of the active session
+                "active_project": {},  # project_name -> project_id
                 "levels": {},  # level_name -> level_id
                 "templates": {},  # template_name -> template_id
                 "views": {},  # view_name -> view_id
@@ -70,9 +71,9 @@ class ChatMemory:
 
         # Store the version to Port mappings
         self.context_data["name_to_id_mappings"]["sessions"] = {
-            session["version"]: session["port"]
+            session["RevitVersion"]: session["Port"]
             for session in sessions
-            if "name" in session and "port" in session
+            if "RevitVersion" in session and "Port" in session
         }
         self.context_data["sessions_last_updated"] = datetime.now()
 
@@ -81,8 +82,23 @@ class ChatMemory:
         self.context_data["active_session"] = session["Port"]
 
         # Store the version to Port mapping
-        self.context_data["name_to_id_mappings"]["active_session"] = session
+        self.context_data["name_to_id_mappings"]["active_session"] = {
+            session["RevitVersion"]: session["Port"]
+        }
         self.context_data["active_session_last_updated"] = datetime.now()
+
+    def store_active_project(self, project: Dict[str, Any]):
+        """Store only name to ID mappings for views"""
+        # Store the full view data for reference
+        self.context_data["active_project"] = project
+
+        # Store the name to ID mappings
+        self.context_data["name_to_id_mappings"]["active_project"] = {
+            param: project[param]
+            for param in project.keys()
+            if param in ["Title", "LocalPath"]
+        }
+        self.context_data["views_last_updated"] = datetime.now()
 
     def store_views(self, views: List[Dict[str, Any]]):
         """Store only name to ID mappings for views"""

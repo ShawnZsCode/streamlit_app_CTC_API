@@ -45,7 +45,7 @@ async def main(initialize_only=False):
             "type": "function",
             "function": {
                 "name": "get_sessions",
-                "description": "Get available Revit sessions",
+                "description": "Get all available Revit sessions",
                 "parameters": {
                     "type": "object",
                     "required": [],
