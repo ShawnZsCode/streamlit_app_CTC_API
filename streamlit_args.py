@@ -278,65 +278,68 @@ Focus on understanding user intent and executing requested actions efficiently."
                     st.session_state.openai_client.create_chat_completion(request)
                 )
                 logging.info(f"Received initial response: {initial_response}")
+                response = initial_response
 
-                if initial_response.function_call:
-                    logging.info(
-                        f"Function call detected: {initial_response.function_call.name}"
-                    )
-                    # Execute the tool
-                    tool_call = ToolCall(
-                        name=initial_response.function_call.name,
-                        parameters=json.loads(initial_response.function_call.arguments),
-                    )
-                    logging.info(
-                        f"Executing tool: {tool_call.name} with parameters: {tool_call.parameters}"
-                    )
-                    tool_response = asyncio.run(
-                        st.session_state.tool_manager.execute_tool(tool_call)
-                    )
-                    logging.info(f"Tool response: {tool_response}")
-
-                    # Add tool response to messages and get LLM interpretation
-                    follow_up_request = ChatCompletion(
-                        messages=[
-                            *request.messages,
-                            ChatMessage(
-                                role=ChatRole.ASSISTANT,
-                                content=None,
-                                function_call=initial_response.function_call,
-                            ),
-                            ChatMessage(
-                                role=ChatRole.FUNCTION,
-                                name=tool_call.name,
-                                content=tool_response.model_dump_json(),
-                            ),
-                        ],
-                        model=request.model,
-                        temperature=request.temperature,
-                    )
-
-                    # Get LLM's interpretation of the tool response
-                    logging.info("Getting final response from OpenAI")
-                    final_response = asyncio.run(
-                        st.session_state.openai_client.create_chat_completion(
-                            follow_up_request
+                if response.function_call:
+                    while response.function_call:
+                        logging.info(
+                            f"Function call detected: {response.function_call.name}"
                         )
-                    )
-                    logging.info(f"Final response: {final_response}")
+                        # Execute the tool
+                        tool_call = ToolCall(
+                            name=response.function_call.name,
+                            parameters=json.loads(response.function_call.arguments),
+                        )
+                        logging.info(
+                            f"Executing tool: {tool_call.name} with parameters: {tool_call.parameters}"
+                        )
+                        tool_response = asyncio.run(
+                            st.session_state.tool_manager.execute_tool(tool_call)
+                        )
+                        logging.info(f"Tool response: {tool_response}")
+
+                        # Add tool response to messages and get LLM interpretation
+                        follow_up_request = ChatCompletion(
+                            messages=[
+                                *request.messages,
+                                ChatMessage(
+                                    role=ChatRole.ASSISTANT,
+                                    content=None,
+                                    function_call=response.function_call,
+                                ),
+                                ChatMessage(
+                                    role=ChatRole.FUNCTION,
+                                    name=tool_call.name,
+                                    content=tool_response.model_dump_json(),
+                                ),
+                            ],
+                            model=request.model,
+                            temperature=request.temperature,
+                        )
+
+                        # Get LLM's interpretation of the tool response
+                        logging.info("Getting final response from OpenAI")
+                        last_response = asyncio.run(
+                            st.session_state.openai_client.create_chat_completion(
+                                follow_up_request
+                            )
+                        )
+                        logging.info(f"Final response: {last_response}")
+
+                        # Update suggested actions based on context
+                        update_suggested_actions(last_response)
+                        response = last_response
 
                     # Add final response to chat
                     st.session_state.messages.append(
-                        {"role": "assistant", "content": final_response.content}
+                        {"role": "assistant", "content": last_response.content}
                     )
-
-                    # Update suggested actions based on context
-                    update_suggested_actions(final_response)
 
                 else:
                     logging.info("No function call needed, using initial response")
                     # If no function call, just add the initial response to chat
                     st.session_state.messages.append(
-                        {"role": "assistant", "content": initial_response.content}
+                        {"role": "assistant", "content": response.content}
                     )
 
                     # Update suggested actions based on context

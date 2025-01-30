@@ -42,6 +42,7 @@ class ChatCompletion(BaseModel):
     model: str = "gpt-4o-mini"
     temperature: float = 0.7
     max_tokens: Optional[int] = None
+    store: Optional[bool] = True
 
 
 # OpenAI Client Wrapper
@@ -63,6 +64,7 @@ class OpenAIClient:
             function_call=request.function_call,
             temperature=request.temperature,
             max_tokens=request.max_tokens,
+            store=request.store,
         )
 
         message = response.choices[0].message

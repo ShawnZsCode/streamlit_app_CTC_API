@@ -61,6 +61,7 @@ class ChatMemory:
                 "views": {},  # view_name -> view_id
                 "categories": {},  # category_name -> category_id
                 "elements": {},  # element_name -> element_id
+                "element": {},  # element_id -> element_data
             }
         }
 
@@ -137,6 +138,18 @@ class ChatMemory:
             if "name" in element and "id" in element
         }
 
+    def store_element_details(self, element: Dict[str, Any]):
+        """Store only name to ID mappings for revit elements"""
+        # Store the full level data for reference
+        self.context_data["element"] = element
+
+        # Store the name to ID mappings
+        self.context_data["name_to_id_mappings"]["element"] = {
+            param["name"]: param["id"]
+            for param in element
+            if "name" in element and "id" in element
+        }
+
     def store_levels(self, levels: List[Dict[str, Any]]):
         """Store only name to ID mappings for levels"""
         # Store the full level data for reference
@@ -188,6 +201,10 @@ class ChatMemory:
     def get_elements(self) -> List[Dict[str, Any]]:
         """Get the stored project elements"""
         return self.context_data.get("elements", [])
+
+    def get_element_details(self) -> List[Dict[str, Any]]:
+        """Get the stored project elements"""
+        return self.context_data.get("element", [])
 
     def get_view_templates(self) -> List[Dict[str, Any]]:
         """Get the stored view templates"""

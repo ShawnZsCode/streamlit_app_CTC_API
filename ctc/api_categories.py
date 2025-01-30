@@ -7,12 +7,26 @@ from dotenv import load_dotenv
 import aiohttp
 
 from core.tool_models import chat_memory
-
-# Load environment variables from .env file in this directory
+from ctc.data_models.categories import RevitCategories, RevitCategory
 
 
 # Revit Tool Implementations
 async def get_categories() -> Dict[str, Any]:
+    """Retrieves all Revit Categories from a constants list"""
+    import csv
+
+    file_path = "ctc/Category_2025.csv"
+    with open(file_path, "r") as open_file:
+        open_file = csv.DictReader(open_file)
+        categories: RevitCategories = RevitCategories()
+        for row in open_file:
+            if row["IsObsolete"] == "FALSE":
+                category = RevitCategory.model_validate(row)
+                categories.Categories.append(category)
+    return categories.model_dump(include=["Categories"])
+
+
+async def get_categories_depricated() -> Dict[str, Any]:
     """Retrieves all the floor plans and 3D views in the project"""
     load_dotenv()
     revit_port = os.getenv("REVIT_PORT")

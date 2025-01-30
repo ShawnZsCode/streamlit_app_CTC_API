@@ -5,7 +5,7 @@ from core.tool_models import (
     ToolCall,
     ToolManager,
 )
-from ctc.sessions import (
+from ctc.api_sessions import (
     get_sessions,
     get_active_session,
     set_active_session,
@@ -15,6 +15,7 @@ from ctc.api_categories import (
 )
 from ctc.api_elements import (
     get_elements,
+    get_element_details,
 )
 from ctc.api_projects import (
     get_active_project,
@@ -146,6 +147,29 @@ async def main(initialize_only=False):
                         "CategoryId": {
                             "type": "number",
                             "description": "The category ID is already stored in memory - use chat_memory.get_id_by_name('categories', category_name) to get it",
+                        },
+                        "IncludeParameters": {
+                            "type": "boolean",
+                            "description": "decide if all parameters and parameter values should be included in the response",
+                        },
+                    },
+                    "additionalProperties": True,
+                },
+                "strict": True,
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "get_element_details",
+                "description": "Get the details of a specific element in the project",
+                "parameters": {
+                    "type": "object",
+                    "required": ["ElementId"],
+                    "properties": {
+                        "ElementId": {
+                            "type": "number",
+                            "description": "The element ID is already stored in memory - use chat_memory.get_id_by_name('elements', elementId) to get it",
                         }
                     },
                     "additionalProperties": True,
@@ -226,6 +250,7 @@ async def main(initialize_only=False):
         "get_view_templates": get_view_templates,
         "create_floor_plan": create_floor_plan,
         "get_elements": get_elements,
+        "get_element_details": get_element_details,
     }
 
     # Register all tools at once
@@ -263,37 +288,39 @@ async def main(initialize_only=False):
 
         # Handle function calls if present
         if response.function_call:
-            # Execute the tool
-            tool_call = ToolCall(
-                name=response.function_call.name,
-                parameters=json.loads(response.function_call.arguments),
-            )
-            tool_response = await tool_manager.execute_tool(tool_call)
-            print(f"Tool response: {tool_response.model_dump_json()}")
+            while response.function_call:
+                # Execute the tool
+                print(f"Function call: {response.function_call.name}")
+                tool_call = ToolCall(
+                    name=response.function_call.name,
+                    parameters=json.loads(response.function_call.arguments),
+                )
+                tool_response = await tool_manager.execute_tool(tool_call)
+                print(f"Tool response: {tool_response.model_dump_json()}")
 
-            # Add tool response to messages and get LLM interpretation
-            follow_up_request = ChatCompletion(
-                messages=[
-                    *request.messages,  # Include original messages
-                    ChatMessage(
-                        role=ChatRole.ASSISTANT,
-                        content=None,
-                        function_call=response.function_call,
-                    ),
-                    ChatMessage(
-                        role=ChatRole.FUNCTION,
-                        name=tool_call.name,
-                        content=tool_response.model_dump_json(),
-                    ),
-                ],
-                model=request.model,
-                temperature=request.temperature,
-            )
+                # Add tool response to messages and get LLM interpretation
+                follow_up_request = ChatCompletion(
+                    messages=[
+                        *request.messages,  # Include original messages
+                        ChatMessage(
+                            role=ChatRole.ASSISTANT,
+                            content=None,
+                            function_call=response.function_call,
+                        ),
+                        ChatMessage(
+                            role=ChatRole.FUNCTION,
+                            name=tool_call.name,
+                            content=tool_response.model_dump_json(),
+                        ),
+                    ],
+                    model=request.model,
+                    temperature=request.temperature,
+                )
 
-            # Get LLM's interpretation of the tool response
-            final_response = await client.create_chat_completion(follow_up_request)
-            print("\nFinal Response:")
-            print(f"\n{final_response.content}")
+                # Get LLM's interpretation of the tool response
+                response = await client.create_chat_completion(follow_up_request)
+                print("\nFollow-up Response:")
+                print(f"\n{response.content}")
         else:
             print(f"Assistant response: {response.content}")
 

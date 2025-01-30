@@ -2,36 +2,12 @@
 
 from os import environ
 from typing import List, Optional, Dict
-from pydantic import BaseModel, ValidationError, Field
-from utils.read_file import read_file
+
 from dotenv import load_dotenv, find_dotenv, set_key
-
+from pydantic import ValidationError
+from utils.read_file import read_file_json
+from ctc.data_models.sessions import RevitSession, RevitSessions
 from ctc.api_projects import get_active_project
-
-
-# Class Definitions
-class LocalBaseModel(BaseModel):
-    """Local Base model defines a function for easy updating of fields"""
-
-    def update(self, **kwargs):
-        for field, value in kwargs.items():
-            if hasattr(self, field):
-                setattr(self, field, value)
-
-
-class RevitSession(LocalBaseModel):
-    """Revit session model"""
-
-    RevitVersion: str
-    Port: int
-    ActiveProject: Optional[str] = ""
-
-
-class RevitSessions(LocalBaseModel):
-    """Revit sessions model"""
-
-    Count: int = 0
-    Sessions: List[RevitSession] = []
 
 
 # Functions
@@ -40,7 +16,7 @@ async def get_sessions() -> List[Dict[str, any]]:
     """Reads the active sessions from the CTC sessions folder"""
     try:
         file_path: str = f"{environ['LOCALAPPDATA']}\\CTC Software\\BIM Automation\\BIM Automation API Instances.json"
-        file_json = read_file(file_path)
+        file_json = read_file_json(file_path)
         rvt_sessions = RevitSessions()
         # RevitSessions.model_validate(file_json)
         for session in file_json:
