@@ -13,7 +13,7 @@ from core.tool_models import chat_memory
 # Revit Tool Implementations
 async def get_elements(
     CategoryId: int,
-    IncludeParameters: str = "false",
+    # IncludeParameters: str = "false",
 ) -> Dict[str, Any]:
     """API call to get the elements in the project"""
     load_dotenv()
@@ -27,9 +27,9 @@ async def get_elements(
         params = {
             "apiKey": api_key,
             "categoryId": CategoryId,
-            "includeParameters": IncludeParameters,
-            "includeFamily": "false",
-            "includeType": "false",
+            # "includeParameters": IncludeParameters,
+            # "includeFamily": "false",
+            # "includeType": "false",
         }
         print(f"Parameters: {params}")
 
@@ -95,3 +95,8 @@ async def update_element(
     async with aiohttp.ClientSession() as session:
         url = f"http://localhost:{revit_port}/api/v1/elements/{element_id}"
         params = {"apiKey": api_key}
+
+
+# Prevent running from this file
+if __name__ == "__main__":
+    pass

@@ -27,3 +27,8 @@ class RevitFamilyType(LocalBaseModel):
     @property
     def InstanceCount(self) -> int:
         return len(self.Instances)
+
+
+# Prevent running from this file
+if __name__ == "__main__":
+    pass

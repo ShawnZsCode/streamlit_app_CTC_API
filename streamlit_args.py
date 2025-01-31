@@ -469,3 +469,8 @@ if st.session_state.suggested_actions:
                                 st.rerun()
                             else:
                                 st.error("Failed to set active session")
+
+
+# Prevent running from this file
+if __name__ == "__main__":
+    pass

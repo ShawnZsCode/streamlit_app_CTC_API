@@ -49,3 +49,8 @@ async def get_active_project(port: int = -1) -> Dict[str, Any]:
                 "success": False,
                 "error": f"Error fetching active project: {str(e)}",
             }
+
+
+# Prevent running from this file
+if __name__ == "__main__":
+    pass

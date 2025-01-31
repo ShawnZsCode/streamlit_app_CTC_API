@@ -5,7 +5,7 @@ from typing import List, Optional, Dict
 
 from dotenv import load_dotenv, find_dotenv, set_key
 from pydantic import ValidationError
-from utils.read_file import read_file_json
+from utils.file_utils import read_file_json
 from ctc.data_models.sessions import RevitSession, RevitSessions
 from ctc.api_projects import get_active_project
 
@@ -94,3 +94,8 @@ async def set_active_session(Port: int = 0, ActiveProject: str = "") -> Dict[str
         print(e)
 
     return rvt_session
+
+
+# Prevent running from this file
+if __name__ == "__main__":
+    pass

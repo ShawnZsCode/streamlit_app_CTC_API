@@ -313,3 +313,8 @@ class ToolManager:
 
 # Example usage
 chat_memory = ChatMemory()
+
+
+# Prevent running from this file
+if __name__ == "__main__":
+    pass

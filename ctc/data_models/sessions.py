@@ -26,3 +26,8 @@ class RevitSessions(LocalBaseModel):
     @property
     def Count(self) -> int:
         return len(self.Categories)
+
+
+# Prevent running from this file
+if __name__ == "__main__":
+    pass

@@ -119,3 +119,8 @@ async def create_floor_plan(
                     }
         except Exception as e:
             return {"success": False, "error": f"Error creating floor plan: {str(e)}"}
+
+
+# Prevent running from this file
+if __name__ == "__main__":
+    pass

@@ -30,3 +30,8 @@ class RevitFamily(LocalBaseModel):
     @property
     def InstanceCount(self) -> int:
         return sum([t.InstanceCount for t in self.Types])
+
+
+# Prevent running from this file
+if __name__ == "__main__":
+    pass

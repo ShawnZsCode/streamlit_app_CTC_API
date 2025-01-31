@@ -82,3 +82,8 @@ class OpenAIClient:
             content=message.content,
             function_call=function_call,
         )
+
+
+# Prevent running from this file
+if __name__ == "__main__":
+    pass

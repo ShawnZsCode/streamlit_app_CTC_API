@@ -13,3 +13,8 @@ class LocalBaseModel(BaseModel):
         for field, value in kwargs.items():
             if hasattr(self, field):
                 setattr(self, field, value)
+
+
+# Prevent running from this file
+if __name__ == "__main__":
+    pass

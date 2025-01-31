@@ -30,3 +30,8 @@ class Parameters(LocalBaseModel):
     @property
     def Count(self) -> int:
         return len(self.Parameters)
+
+
+# Prevent running from this file
+if __name__ == "__main__":
+    pass

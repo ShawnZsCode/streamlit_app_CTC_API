@@ -15,12 +15,12 @@ async def get_categories() -> Dict[str, Any]:
     """Retrieves all Revit Categories from a constants list"""
     import csv
 
-    file_path = "ctc/Category_2025.csv"
+    file_path = "ctc/constants/Category_2025.csv"
     with open(file_path, "r") as open_file:
         open_file = csv.DictReader(open_file)
         categories: RevitCategories = RevitCategories()
         for row in open_file:
-            if row["IsObsolete"] == "FALSE":
+            if row["IsObsolete"] == "FALSE" and row["ForLLM"] == "TRUE":
                 category = RevitCategory.model_validate(row)
                 categories.Categories.append(category)
     return categories.model_dump(include=["Categories"])
@@ -54,3 +54,8 @@ async def get_categories_depricated() -> Dict[str, Any]:
                     }
         except Exception as e:
             return {"success": False, "error": f"Error fetching categories: {str(e)}"}
+
+
+# Prevent running from this file
+if __name__ == "__main__":
+    pass

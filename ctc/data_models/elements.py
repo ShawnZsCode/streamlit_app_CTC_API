@@ -13,3 +13,8 @@ class RevitElement(LocalBaseModel):
     Id: int = Field(alias="id")
     Name: str = Field(alias="name")
     Parameters: Optional[List[Parameter]] = Field(default=[], alias="parameters")
+
+
+# Prevent running from this file
+if __name__ == "__main__":
+    pass

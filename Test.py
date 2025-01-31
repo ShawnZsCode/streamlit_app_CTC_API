@@ -19,7 +19,8 @@ if __name__ == "__main__":
     #     print(session_active)
 
     from ctc.data_models.categories import RevitCategories, RevitCategory
-    from utils.read_file import read_file_csv
+
+    # from utils.file_utils import read_file_csv
     import csv
 
     # print(read_file_json("data/definitions.json"))

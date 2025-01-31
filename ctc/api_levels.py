@@ -42,3 +42,8 @@ async def get_levels() -> Dict[str, Any]:
 
     # async def create_level()
     """API call to create a new level in the project"""
+
+
+# Prevent running from this file
+if __name__ == "__main__":
+    pass

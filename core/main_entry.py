@@ -1,6 +1,8 @@
 import os
 import json
 
+from utils.file_utils import read_file_json
+
 from core.tool_models import (
     ToolCall,
     ToolManager,
@@ -41,208 +43,13 @@ async def main(initialize_only=False):
     tool_manager = ToolManager()
 
     # Define your tools configuration
-    tools_config = [
-        {
-            "type": "function",
-            "function": {
-                "name": "get_sessions",
-                "description": "Get all available Revit sessions",
-                "parameters": {
-                    "type": "object",
-                    "required": [],
-                    "properties": {},
-                    "additionalProperties": False,
-                },
-                "strict": True,
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "get_active_session",
-                "description": "Gets current Revit session",
-                "parameters": {
-                    "type": "object",
-                    "required": [],
-                    "properties": {},
-                    "additionalProperties": False,
-                },
-                "strict": True,
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "set_active_session",
-                "description": "set the port to target an available Revit session",
-                "parameters": {
-                    "type": "object",
-                    "required": [],
-                    "properties": {
-                        "Port": {
-                            "type": "integer",
-                            "description": "The port number of the Revit session to connect to. If not specified, 0 will be used.",
-                        },
-                        "ActiveProject": {
-                            "type": "string",
-                            "description": "The name of the Revit project to connect to. If not specified, '' will be used.",
-                        },
-                    },
-                    "additionalProperties": False,
-                },
-                "strict": True,
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "get_active_project",
-                "description": "Get active project open in Revit right now",
-                "parameters": {
-                    "type": "object",
-                    "required": [],
-                    "properties": {},
-                    "additionalProperties": False,
-                },
-                "strict": True,
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "get_views",
-                "description": "Retrieves all the floor plans and 3D views in the project.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {},
-                    "additionalProperties": False,
-                    "required": [],
-                },
-                "strict": True,
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "get_categories",
-                "description": "Get the categories in the project",
-                "parameters": {
-                    "type": "object",
-                    "properties": {},
-                    "additionalProperties": False,
-                    "required": [],
-                },
-                "strict": True,
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "get_elements",
-                "description": "Get the elements in the project",
-                "parameters": {
-                    "type": "object",
-                    "required": ["CategoryId"],
-                    "properties": {
-                        "CategoryId": {
-                            "type": "number",
-                            "description": "The category ID is already stored in memory - use chat_memory.get_id_by_name('categories', category_name) to get it",
-                        },
-                        "IncludeParameters": {
-                            "type": "boolean",
-                            "description": "decide if all parameters and parameter values should be included in the response",
-                        },
-                    },
-                    "additionalProperties": True,
-                },
-                "strict": True,
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "get_element_details",
-                "description": "Get the details of a specific element in the project",
-                "parameters": {
-                    "type": "object",
-                    "required": ["ElementId"],
-                    "properties": {
-                        "ElementId": {
-                            "type": "number",
-                            "description": "The element ID is already stored in memory - use chat_memory.get_id_by_name('elements', elementId) to get it",
-                        }
-                    },
-                    "additionalProperties": True,
-                },
-                "strict": True,
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "get_levels",
-                "description": "Get the levels in the project",
-                "parameters": {
-                    "type": "object",
-                    "properties": {},
-                    "additionalProperties": False,
-                    "required": [],
-                },
-                "strict": True,
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "get_view_templates",
-                "description": "Get the view templates in the project",
-                "parameters": {
-                    "type": "object",
-                    "properties": {},
-                    "additionalProperties": False,
-                    "required": [],
-                },
-                "strict": True,
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "create_floor_plan",
-                "description": "Creates a new floor plan view in Revit. Use this function IMMEDIATELY when a user asks to create a floor plan - do not check other data first. All required IDs are already stored in memory.",
-                "parameters": {
-                    "type": "object",
-                    "required": ["Name", "LevelId", "ViewTemplateId", "ScopeBoxId"],
-                    "properties": {
-                        "Name": {
-                            "type": "string",
-                            "description": "The name for the new floor plan view (use exactly as provided by user)",
-                        },
-                        "LevelId": {
-                            "type": "number",
-                            "description": "The level ID is already stored in memory - use chat_memory.get_id_by_name('levels', level_name) to get it",
-                        },
-                        "ViewTemplateId": {
-                            "type": "number",
-                            "description": "The template ID is already stored in memory - use chat_memory.get_id_by_name('templates', template_name) to get it",
-                        },
-                        "ScopeBoxId": {
-                            "type": "number",
-                            "description": "Use 0 when no scope box is specified",
-                        },
-                    },
-                    "additionalProperties": False,
-                },
-                "strict": True,
-            },
-        },
-    ]
+    tools_config = read_file_json("core\\function_tools.json")
 
     # Create implementations mapping
     implementations = {
         "get_sessions": get_sessions,
-        "set_active_session": set_active_session,
         "get_active_session": get_active_session,
+        "set_active_session": set_active_session,
         "get_active_project": get_active_project,
         "get_views": get_views,
         "get_categories": get_categories,
@@ -325,7 +132,6 @@ async def main(initialize_only=False):
             print(f"Assistant response: {response.content}")
 
 
-# if __name__ == "__main__":
-#     import asyncio
-
-#     asyncio.run(main())
+# Prevent running from this file
+if __name__ == "__main__":
+    pass

@@ -1,0 +1,152 @@
+[
+    {
+        "type": "function",
+        "function": {
+            "name": "get_sessions",
+            "description": "Get all available Revit sessions",
+            "parameters": {
+                "type": "object",
+                "required": [],
+                "properties": {},
+                "additionalProperties": "false"
+            },
+            "strict": "true"
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_active_session",
+            "description": "Gets current Revit session",
+            "parameters": {
+                "type": "object",
+                "required": [],
+                "properties": {},
+                "additionalProperties": "false"
+            },
+            "strict": "true"
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "set_active_session",
+            "description": "set the port to target an available Revit session",
+            "parameters": {
+                "type": "object",
+                "required": [],
+                "properties": {
+                    "Port": {
+                        "type": "integer",
+                        "description": "The port number of the Revit session to connect to. If not specified, 0 will be used."
+                    },
+                    "ActiveProject": {
+                        "type": "string",
+                        "description": "The name of the Revit project to connect to. If not specified, '' will be used."
+                    }
+                },
+                "additionalProperties": "false"
+            },
+            "strict": "true"
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_active_project",
+            "description": "Get active project open in Revit right now",
+            "parameters": {
+                "type": "object",
+                "required": [],
+                "properties": {},
+                "additionalProperties": "false"
+            },
+            "strict": "true"
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_categories",
+            "description": "Get the categories in the project",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": "false",
+                "required": []
+            },
+            "strict": "true"
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_elements",
+            "description": "Get the elements in the project",
+            "parameters": {
+                "type": "object",
+                "required": [
+                    "CategoryId"
+                ],
+                "properties": {
+                    "CategoryId": {
+                        "type": "number",
+                        "description": "The category ID is already stored in memory - use chat_memory.get_id_by_name('categories', category_name) to get it"
+                    }
+                },
+                "additionalProperties": "true"
+            },
+            "strict": "true"
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_view_templates",
+            "description": "Get the view templates in the project",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": "false",
+                "required": []
+            },
+            "strict": "true"
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "create_floor_plan",
+            "description": "Creates a new floor plan view in Revit. Use this function IMMEDIATELY when a user asks to create a floor plan - do not check other data first. All required IDs are already stored in memory.",
+            "parameters": {
+                "type": "object",
+                "required": [
+                    "Name",
+                    "LevelId",
+                    "ViewTemplateId",
+                    "ScopeBoxId"
+                ],
+                "properties": {
+                    "Name": {
+                        "type": "string",
+                        "description": "The name for the new floor plan view (use exactly as provided by user)"
+                    },
+                    "LevelId": {
+                        "type": "number",
+                        "description": "The level ID is already stored in memory - use chat_memory.get_id_by_name('levels', level_name) to get it"
+                    },
+                    "ViewTemplateId": {
+                        "type": "number",
+                        "description": "The template ID is already stored in memory - use chat_memory.get_id_by_name('templates', template_name) to get it"
+                    },
+                    "ScopeBoxId": {
+                        "type": "number",
+                        "description": "Use 0 when no scope box is specified"
+                    }
+                },
+                "additionalProperties": "false"
+            },
+            "strict": "true"
+        }
+    }
+]
