@@ -1,4 +1,4 @@
-"""Core functions for CTC Chatbot API"""
+"""Core functions for CTC Chatbot to get Projects from the Revit API"""
 
 import os
 from datetime import datetime

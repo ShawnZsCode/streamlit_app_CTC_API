@@ -1,4 +1,5 @@
-"""Core functions for CTC API Levels"""
+"""Core functions for CTC Chatbot to get Levels from the Revit API"""
+# Depricated
 
 import os
 from typing import Dict, Any

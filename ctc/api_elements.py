@@ -1,4 +1,4 @@
-"""Core functions for CTC API Elements"""
+"""Core functions for CTC Chatbot to get Elements from the Revit API"""
 
 import os
 from typing import Dict, Any

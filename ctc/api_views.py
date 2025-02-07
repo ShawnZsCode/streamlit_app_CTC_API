@@ -1,4 +1,5 @@
-"""Core functions for CTC Chatbot API"""
+"""Core functions for CTC Chatbot to get Views from the Revit API"""
+# Depricated
 
 import os
 from datetime import datetime

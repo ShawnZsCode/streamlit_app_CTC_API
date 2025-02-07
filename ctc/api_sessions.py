@@ -1,4 +1,4 @@
-"""toolset to read the active sessions from the CTC sessions folder"""
+"""Core functions for CTC Chatbot to get avialable sessions from the BIM Automation Instances API Json file"""
 
 from os import environ
 from typing import List, Optional, Dict
@@ -12,7 +12,7 @@ from ctc.api_projects import get_active_project
 
 # Functions
 ## get active sessions
-async def get_sessions() -> List[Dict[str, any]]:
+async def get_sessions() -> RevitSessions:
     """Reads the active sessions from the CTC sessions folder"""
     try:
         file_path: str = f"{environ['LOCALAPPDATA']}\\CTC Software\\BIM Automation\\BIM Automation API Instances.json"
@@ -29,7 +29,7 @@ async def get_sessions() -> List[Dict[str, any]]:
         rvt_sessions = RevitSessions()
 
     rvt_sessions.update(Count=rvt_sessions.Sessions.__len__())
-    return rvt_sessions.model_dump()
+    return rvt_sessions
 
 
 ## fetch and record the active model for each session in revitsessions
@@ -51,19 +51,19 @@ async def get_active_model(revit_session: RevitSession) -> RevitSession:
 
 
 ## return the active session
-async def get_active_session() -> Dict[str, any]:
+async def get_active_session() -> RevitSession:
     """Returns the active session from the settings in the dotenv file"""
     try:
         load_dotenv()
         port = int(environ["REVIT_PORT"])
         rvt_sessions = await get_sessions()
-        for session in rvt_sessions["Sessions"]:
-            if session["Port"] == port:
+        for session in rvt_sessions.Sessions:
+            if session.Port == port:
                 return session
     except Exception as e:
         print(e)
         session = RevitSession()
-        return session.model_dump()
+        return session
 
 
 ## set the active session/port in the .env file by direct input or by active model

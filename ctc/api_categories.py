@@ -1,4 +1,4 @@
-"""Core functions for CTC Chatbot API"""
+"""Core functions for CTC Chatbot to get Cateogies from a constants list"""
 
 import os
 from datetime import datetime
@@ -11,7 +11,7 @@ from ctc.data_models.categories import RevitCategories, RevitCategory
 
 
 # Revit Tool Implementations
-async def get_categories() -> Dict[str, Any]:
+async def get_categories() -> RevitCategories:
     """Retrieves all Revit Categories from a constants list"""
     import csv
 
@@ -23,7 +23,7 @@ async def get_categories() -> Dict[str, Any]:
             if row["IsObsolete"] == "FALSE" and row["ForLLM"] == "TRUE":
                 category = RevitCategory.model_validate(row)
                 categories.Categories.append(category)
-    return categories.model_dump(include=["Categories"])
+    return categories
 
 
 async def get_categories_depricated() -> Dict[str, Any]:
