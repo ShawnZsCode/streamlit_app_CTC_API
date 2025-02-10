@@ -28,6 +28,20 @@ class RevitFamilyType(LocalBaseModel):
     def InstanceCount(self) -> int:
         return len(self.Instances)
 
+    # Check to see if the element exists in the family types list
+    def has_instance(self, element: RevitElement) -> bool:
+        for element_self in self.Instances:
+            if (element_self.Id == element.Id) and (element_self.Name == element.Name):
+                return True
+        return False
+
+    # Get the index of the element in the family types list
+    def get_instance_index(self, element: RevitElement) -> int:
+        for i, element_self in enumerate(self.Instances):
+            if (element_self.Id == element.Id) and (element_self.Name == element.Name):
+                return i
+        return -1
+
 
 # Prevent running from this file
 if __name__ == "__main__":

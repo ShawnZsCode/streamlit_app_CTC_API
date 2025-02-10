@@ -8,6 +8,9 @@ from dotenv import load_dotenv
 import aiohttp
 
 from core.tool_models import chat_memory
+from ctc.data_models.families import RevitFamily, RevitFamilyType
+from ctc.data_models.categories import RevitCategory
+from ctc.data_models.sessions import RevitSession
 
 # Load environment variables from .env file in this directory
 
@@ -43,7 +46,11 @@ async def get_views() -> Dict[str, Any]:
             return {"success": False, "error": f"Error fetching views: {str(e)}"}
 
 
-async def get_view_templates() -> List[Dict[str, Any]]:
+async def get_view_templates(
+    *,
+    session: RevitSession,
+    category: RevitCategory,
+) -> RevitCategory:
     """Get the view templates in the project"""
     load_dotenv()
     revit_port = os.getenv("REVIT_PORT")
@@ -60,18 +67,22 @@ async def get_view_templates() -> List[Dict[str, Any]]:
                 if response.status == 200:
                     templates = await response.json()
 
-                    # Store name to ID mappings
-                    chat_memory.store_templates(templates)
+                    # Enter View Templates into Category
+                    for template in templates:
+                        template = RevitFamily.model_validate(template)
+                        category.Families.append(template)
 
-                    return {"success": True, "result": templates}
+                    return {"success": True, "result": category}
                 else:
                     return {
                         "success": False,
+                        "result": category,
                         "error": f"Failed to fetch view templates. Status code: {response.status}",
                     }
         except Exception as e:
             return {
                 "success": False,
+                "result": category,
                 "error": f"Error fetching view templates: {str(e)}",
             }
 

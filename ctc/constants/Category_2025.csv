@@ -616,7 +616,7 @@ ID,EnumName,DisplayName,IsFamilyInstanceCreatable,IsObsolete,IsAnnotation,IsFami
 -2001355,OST_StructuralStiffenerTags,Structural Stiffener Tags,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE
 -2001354,OST_StructuralStiffener,Structural Stiffeners,TRUE,FALSE,FALSE,TRUE,FALSE,FALSE
 -2001353,OST_FootingAnalyticalGeometry,FootingAnalyticalGeometry,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
--2001352,OST_RvtLinks,RVT Links,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE
+-2001352,OST_RvtLinks,RVT Links,TRUE,FALSE,FALSE,FALSE,FALSE,TRUE
 -2001351,OST_Automatic,Automatic,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
 -2001350,OST_SpecialityEquipment,Specialty Equipment,TRUE,FALSE,FALSE,TRUE,FALSE,FALSE
 -2001344,OST_ColumnAnalyticalRigidLinks,Column Analytical Rigid Links,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
@@ -685,7 +685,7 @@ ID,EnumName,DisplayName,IsFamilyInstanceCreatable,IsObsolete,IsAnnotation,IsFami
 -2001103,OST_ToposolidLinkTags,Toposolid Link Tags,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE
 -2001102,OST_ElectricalConnectorTags,ElectricalConnectorTags,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE
 -2001101,OST_ElectricalConnector,ElectricalConnector,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
--2001100,OST_FurnitureSystems,Furniture Systems,TRUE,FALSE,FALSE,TRUE,FALSE,FALSE
+-2001100,OST_FurnitureSystems,Furniture Systems,TRUE,FALSE,FALSE,TRUE,FALSE,TRUE
 -2001099,OST_ElectricalLoadCase,ElectricalLoadCase,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
 -2001098,OST_ElectricalLoadSet,Electrical Analytical Load Set,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE
 -2001097,OST_ToposolidLink,Toposolid Links,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
@@ -1126,7 +1126,7 @@ ID,EnumName,DisplayName,IsFamilyInstanceCreatable,IsObsolete,IsAnnotation,IsFami
 -2000083,OST_ReferenceLines,Reference Lines,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE
 -2000082,OST_IOSNotSilhouette,IOS Not Silhouette,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
 -2000081,OST_FillPatterns,Fill Patterns,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
--2000080,OST_Furniture,Furniture,TRUE,FALSE,FALSE,TRUE,FALSE,FALSE
+-2000080,OST_Furniture,Furniture,TRUE,FALSE,FALSE,TRUE,FALSE,TRUE
 -2000079,OST_AreaSchemeLines,<Area Boundary>,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE
 -2000078,OST_GenericLines,Generic Lines,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
 -2000077,OST_InsulationLines,<Insulation Batting Lines>,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
@@ -1192,7 +1192,7 @@ ID,EnumName,DisplayName,IsFamilyInstanceCreatable,IsObsolete,IsAnnotation,IsFami
 -2000017,OST_WindowsFrameMullionCut,Windows Frame Mullion Cut,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
 -2000016,OST_WindowsGlassProjection,Windows Glass,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
 -2000015,OST_WindowsGlassCut,Windows Glass Cut,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
--2000014,OST_Windows,Windows,TRUE,FALSE,FALSE,TRUE,FALSE,FALSE
+-2000014,OST_Windows,Windows,TRUE,FALSE,FALSE,TRUE,FALSE,TRUE
 -2000013,OST_WallsProjectionOutlines,Walls Projection Outlines,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
 -2000012,OST_WallsCutOutlines,Walls Cut Outlines,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE
 -2000011,OST_Walls,Walls,TRUE,FALSE,FALSE,FALSE,FALSE,TRUE
@@ -1212,3 +1212,5 @@ ID,EnumName,DisplayName,IsFamilyInstanceCreatable,IsObsolete,IsAnnotation,IsFami
 2147483645,ImportOrLink,Import or Link,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE
 2147483646,CADImportOrLink,CAD Import/Link,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE
 -2000317,OST_DetailArray,DetailArray,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE
+2147483647,ViewTemplate,View Templates,FALSE,FALSE,FALSE,FALSE,TRUE,TRUE
+2147483648,Worksets,Worksets,FALSE,FALSE,FALSE,FALSE,TRUE,TRUE
