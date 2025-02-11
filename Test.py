@@ -10,6 +10,8 @@ from ctc.api_sessions import (
     RevitSession,
 )
 
+from utils.file_utils import write_file_json
+
 if __name__ == "__main__":
     #     import asyncio
 
@@ -19,7 +21,7 @@ if __name__ == "__main__":
     #     asyncio.run(set_active_session(Port=port))
     #     session_active = asyncio.run(get_active_session())
     #     print(session_active)
-
+    from typing import List
     from ctc.data_models.categories import RevitCategories, RevitCategory
     from ctc.data_models.families import RevitFamily
     from ctc.data_models.elements import RevitElement
@@ -27,6 +29,8 @@ if __name__ == "__main__":
     from ctc.api_categories import get_categories
     from ctc.api_famlies import get_families
     from ctc.api_elements import get_elements
+    from datetime import datetime
+    from ctc.data_models.parameters import ParameterSimple
 
     # from utils.file_utils import read_file_csv
     import csv
@@ -56,6 +60,12 @@ if __name__ == "__main__":
         )
         project.Categories[c] = result_val["result"]
 
-        # print(category.model_dump())
-
-    print(project.model_dump())
+    category_doors = project.get_category_by_name("doors")
+    # door_param_list = category_doors.get_parameter_list()
+    # print(category.model_dump())
+    sub_folder = datetime.now().strftime("%Y%m%d")
+    write_file_json(
+        stream=project.model_dump(),
+        file_name=f"{session.Port}_{session.RevitVersion}_{session.ActiveProject}",
+        folder=f"{sub_folder}",
+    )

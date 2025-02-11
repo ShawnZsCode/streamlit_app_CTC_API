@@ -6,6 +6,7 @@ from typing import List, Optional
 from ctc.data_models.common import LocalBaseModel
 from ctc.data_models.families import RevitFamily
 from ctc.data_models.family_types import RevitFamilyType
+from ctc.data_models.parameters import ParameterSimple, StorageLocation
 # Class Definitions
 
 
@@ -24,6 +25,56 @@ class RevitCategory(BaseModel):
     @property
     def FamilyCount(self) -> int:
         return len(self.Families)
+
+    # Method to return a simple parameter list
+    @computed_field
+    @property
+    def ParameterList(self) -> List[ParameterSimple]:
+        parameters = []
+        for family in self.Families:
+            for parameter in family.Parameters:
+                if not self.has_parameter(parameters, parameter):
+                    simple_parameter = ParameterSimple(
+                        Id=parameter.Id, Name=parameter.Name, StoredIn="Family"
+                    )
+                    parameters.append(simple_parameter)
+            for type in family.Types:
+                for parameter in type.Parameters:
+                    if not self.has_parameter(parameters, parameter):
+                        simple_parameter = ParameterSimple(
+                            Id=parameter.Id,
+                            Name=parameter.Name,
+                            StoredIn="Type",
+                        )
+                        parameters.append(simple_parameter)
+                for element in type.Instances:
+                    for parameter in element.Parameters:
+                        if not self.has_parameter(parameters, parameter):
+                            simple_parameter = ParameterSimple(
+                                Id=parameter.Id,
+                                Name=parameter.Name,
+                                StoredIn="Instance",
+                            )
+                            parameters.append(simple_parameter)
+        return parameters
+
+    # Check to see if the parameter exists in the parameters list
+    def has_parameter(
+        self,
+        param_list: List[ParameterSimple],
+        parameter: ParameterSimple,
+    ) -> bool:
+        for param in param_list:
+            if param == parameter:
+                return True
+        return False
+
+    # Get the parameter by name
+    def get_parameter_by_name(self, name: str) -> ParameterSimple:
+        for parameter in self.ParameterList:
+            if parameter.Name.lower() == name.lower():
+                return parameter
+        return None
 
     # Check to see if the family exists in the category's families list
     def has_family(self, family: RevitFamily) -> bool:
@@ -82,6 +133,13 @@ class RevitCategories(LocalBaseModel):
             ):
                 return i
         return -1
+
+    # Get Category by Name
+    def get_category_by_name(self, name: str) -> RevitCategory:
+        for category in self.Categories:
+            if category.Name.lower() == name.lower():
+                return category
+        return None
 
 
 # Prevent running from this file

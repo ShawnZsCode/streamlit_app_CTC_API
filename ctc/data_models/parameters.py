@@ -2,6 +2,7 @@
 
 from pydantic import Field, computed_field
 from typing import List, Optional
+from enum import Enum
 from ctc.data_models.common import LocalBaseModel
 
 
@@ -13,19 +14,19 @@ class Parameter(LocalBaseModel):
     Name: str = Field(alias="name")
     HasValue: bool = Field(
         alias="hasValue",
-        exclude=True,
+        # exclude=True,
     )
     IsShared: bool = Field(
         alias="isShared",
-        exclude=True,
+        # exclude=True,
     )
     IsReadOnly: bool = Field(
         alias="isReadOnly",
-        exclude=True,
+        # exclude=True,
     )
     StorageType: str = Field(
         alias="storageType",
-        exclude=True,
+        # exclude=True,
     )
     ValueAsString: Optional[str] = Field(
         default=None,
@@ -34,18 +35,35 @@ class Parameter(LocalBaseModel):
     ValueAsElementId: Optional[int] = Field(
         default=None,
         alias="valueAsElementId",
-        exclude=True,
+        # exclude=True,
     )
     ValueAsInteger: Optional[int] = Field(
         default=None,
         alias="valueAsInt",
-        exclude=True,
+        # exclude=True,
     )
     ValueAsDouble: Optional[float] = Field(
         default=None,
         alias="valueAsDouble",
-        exclude=True,
+        # exclude=True,
     )
+
+
+class StorageLocation(Enum):
+    """Revit Parameter storage location"""
+
+    Family: str = "Family"
+    Type: str = "Type"
+    Instance: str = "Instance"
+
+
+class ParameterSimple(LocalBaseModel):
+    """Revit Parameter model"""
+
+    Id: int
+    Name: str
+    StoredIn: str
+    # StoredIn: StorageLocation
 
 
 class Parameters(LocalBaseModel):
